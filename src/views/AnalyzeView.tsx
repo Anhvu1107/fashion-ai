@@ -13,7 +13,6 @@ import {
   Tag,
   Calendar,
   Sun,
-import {
   TrendingUp,
   Lightbulb,
 } from 'lucide-react';
