@@ -13,10 +13,12 @@ import {
   Tag,
   Calendar,
   Sun,
+import {
   TrendingUp,
   Lightbulb,
 } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
+import { useTranslation } from '../hooks/useTranslation';
 
 function ColorSwatch({ color, hex, percentage }: { color: string; hex: string; percentage: number }) {
   return (
@@ -49,6 +51,7 @@ function ColorSwatch({ color, hex, percentage }: { color: string; hex: string; p
 }
 
 function AnalyzingOverlay() {
+  const { t } = useTranslation();
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -68,7 +71,7 @@ function AnalyzingOverlay() {
           />
         </svg>
       </div>
-      <p className="text-white font-['Space_Grotesk'] text-sm mb-1">Analyzing outfit...</p>
+      <p className="text-white font-['Space_Grotesk'] text-sm mb-1">{t('analyze_analyzing')}</p>
       <p className="text-[#555] font-['Space_Grotesk'] text-xs">Running Gemini Vision · CLIP · StyleNet</p>
       <div className="flex gap-1.5 mt-4">
         {[0, 0.2, 0.4].map((delay, i) => (
@@ -95,6 +98,7 @@ export default function AnalyzeView() {
     clearAnalysis,
     setView,
   } = useAppStore();
+  const { t } = useTranslation();
 
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
@@ -152,12 +156,10 @@ export default function AnalyzeView() {
                   )}
                 </div>
                 <p className="text-white font-['Space_Grotesk'] text-sm mb-1">
-                  {isDragActive ? 'Drop your outfit here' : 'Upload outfit photo'}
+                  {isDragActive ? t('analyze_drag_drop') : t('analyze_upload_title')}
                 </p>
                 <p className="text-[#555] font-['Space_Grotesk'] text-xs text-center">
-                  Drag & drop or click to browse
-                  <br />
-                  JPG, PNG, WEBP up to 10MB
+                  {t('analyze_formats')}
                 </p>
                 <div className="mt-6 flex gap-2">
                   {['/images/mock-outfit-1.jpg', '/images/mock-outfit-2.jpg', '/images/mock-outfit-3.jpg'].map((src, i) => (
@@ -213,12 +215,12 @@ export default function AnalyzeView() {
               {isAnalyzing ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  Analyzing with Gemini Vision...
+                  {t('analyze_analyzing')}
                 </>
               ) : (
                 <>
                   <Sparkles className="w-4 h-4" />
-                  Analyze This Outfit
+                  {t('analyze_btn_start')}
                   <ChevronRight className="w-4 h-4" />
                 </>
               )}
@@ -242,7 +244,7 @@ export default function AnalyzeView() {
                   <div className="flex items-start justify-between mb-4">
                     <div>
                       <p className="text-[10px] text-[#C9A84C] font-['Space_Grotesk'] tracking-[0.2em] uppercase mb-1">
-                        Style Identity
+                        {t('analyze_title')}
                       </p>
                       <h3 className="text-2xl font-light text-white font-['Cormorant_Garamond']">
                         {analysisResult.style}
@@ -258,7 +260,7 @@ export default function AnalyzeView() {
                           {analysisResult.styleScore}
                         </span>
                       </div>
-                      <p className="text-[10px] text-[#555] font-['Space_Grotesk']">Style Score</p>
+                      <p className="text-[10px] text-[#555] font-['Space_Grotesk']">{t('analyze_score')}</p>
                     </div>
                   </div>
                   <p className="text-sm text-[#777] font-['Space_Grotesk'] font-light leading-relaxed">
@@ -271,7 +273,7 @@ export default function AnalyzeView() {
                   <div className="flex items-center gap-2 mb-3">
                     <Palette className="w-4 h-4 text-[#C9A84C]" />
                     <p className="text-xs text-[#888] font-['Space_Grotesk'] tracking-wide uppercase">
-                      Color Palette
+                      {t('analyze_color_palette')}
                     </p>
                   </div>
                   <div className="space-y-2">
@@ -286,7 +288,7 @@ export default function AnalyzeView() {
                   <div className="flex items-center gap-2 mb-3">
                     <Tag className="w-4 h-4 text-[#C9A84C]" />
                     <p className="text-xs text-[#888] font-['Space_Grotesk'] tracking-wide uppercase">
-                      Detected Items
+                      {t('analyze_key_items')}
                     </p>
                   </div>
                   <div className="flex flex-wrap gap-2">
@@ -307,7 +309,7 @@ export default function AnalyzeView() {
                     <div className="flex items-center gap-2 mb-3">
                       <Calendar className="w-4 h-4 text-[#C9A84C]" />
                       <p className="text-[10px] text-[#888] font-['Space_Grotesk'] tracking-wide uppercase">
-                        Best For
+                        {t('analyze_occasions')}
                       </p>
                     </div>
                     <div className="space-y-1.5">
@@ -342,7 +344,7 @@ export default function AnalyzeView() {
                   <div className="flex items-center gap-2 mb-3">
                     <Lightbulb className="w-4 h-4 text-[#C9A84C]" />
                     <p className="text-xs text-[#C9A84C] font-['Space_Grotesk'] tracking-wide uppercase">
-                      Stylist Tips
+                      {t('analyze_style_tips')}
                     </p>
                   </div>
                   <div className="space-y-3">

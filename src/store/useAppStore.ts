@@ -9,6 +9,10 @@ import {
 type AppView = 'home' | 'analyze' | 'chat' | 'search' | 'history';
 
 interface AppStore {
+  // Locale
+  language: 'en' | 'vi';
+  toggleLanguage: () => void;
+
   // Navigation
   currentView: AppView;
   setView: (view: AppView) => void;
@@ -56,6 +60,10 @@ function getRandomProducts(count = 6): Product[] {
 
 
 export const useAppStore = create<AppStore>((set, get) => ({
+  // Locale
+  language: 'en',
+  toggleLanguage: () => set((state) => ({ language: state.language === 'en' ? 'vi' : 'en' })),
+
   // Navigation
   currentView: 'home',
   setView: (view) => set({ currentView: view }),

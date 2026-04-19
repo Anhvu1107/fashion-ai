@@ -9,15 +9,8 @@ import {
   MessageSquare,
 } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
+import { useTranslation } from '../hooks/useTranslation';
 
-const QUICK_PROMPTS = [
-  'How should I dress for a job interview?',
-  'What to wear on a first date?',
-  'Build me a capsule wardrobe',
-  'How to dress for a gala event?',
-  'Explain the quiet luxury aesthetic',
-  'Best colors for my skin tone?',
-];
 
 function TypingIndicator() {
   return (
@@ -43,6 +36,7 @@ function TypingIndicator() {
 
 export default function ChatView() {
   const { messages, isChatLoading, sendMessage, clearChat } = useAppStore();
+  const { t } = useTranslation();
   const [input, setInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -79,10 +73,10 @@ export default function ChatView() {
             <Zap className="w-5 h-5 text-black" fill="currentColor" />
           </div>
           <div>
-            <p className="text-sm text-white font-['Space_Grotesk'] font-medium">AURA Stylist</p>
+            <p className="text-sm text-white font-['Space_Grotesk'] font-medium">{t('chat_agent_name')}</p>
             <div className="flex items-center gap-1.5">
               <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <p className="text-[11px] text-[#555] font-['Space_Grotesk']">Online · Gemini LLM</p>
+              <p className="text-[11px] text-[#555] font-['Space_Grotesk']">{t('chat_agent_status')}</p>
             </div>
           </div>
         </div>
@@ -91,7 +85,7 @@ export default function ChatView() {
           className="flex items-center gap-2 text-xs text-[#555] hover:text-[#C9A84C] font-['Space_Grotesk'] transition-colors p-2 rounded-lg hover:bg-[#C9A84C]/10"
         >
           <RefreshCw className="w-3.5 h-3.5" />
-          Clear chat
+          {t('chat_btn_clear')}
         </button>
       </div>
 
@@ -155,10 +149,10 @@ export default function ChatView() {
         >
           <p className="text-[10px] text-[#444] font-['Space_Grotesk'] uppercase tracking-[0.15em] mb-2 flex items-center gap-2">
             <MessageSquare className="w-3 h-3" />
-            Quick questions
+            {t('chat_quick_prompts')}
           </p>
           <div className="flex flex-wrap gap-2">
-            {QUICK_PROMPTS.map((prompt) => (
+            {(t('chat_quick_prompts_list') as unknown as string[]).map((prompt) => (
               <button
                 key={prompt}
                 onClick={() => sendMessage(prompt)}
@@ -183,7 +177,7 @@ export default function ChatView() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Ask your stylist anything... (Shift+Enter for new line)"
+            placeholder={t('chat_placeholder') as string}
             rows={1}
             className="flex-1 bg-transparent text-white text-sm font-['Space_Grotesk'] font-light placeholder:text-[#444] resize-none outline-none leading-relaxed"
             style={{ minHeight: '28px', maxHeight: '120px' }}
@@ -202,7 +196,7 @@ export default function ChatView() {
           </button>
         </div>
         <p className="text-[10px] text-[#333] font-['Space_Grotesk'] text-center mt-2">
-          AURA uses Gemini LLM for fashion intelligence · Responses are AI-generated style guidance
+          {t('chat_disclaimer')}
         </p>
       </div>
     </motion.div>

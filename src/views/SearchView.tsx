@@ -3,8 +3,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Upload, Loader2, ShoppingBag, ExternalLink, Star, Zap } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 import type { Product } from '../data/mockProducts';
+import { useTranslation } from '../hooks/useTranslation';
 
 function ProductCard({ product, index }: { product: Product; index: number }) {
+  const { t } = useTranslation();
   const images = [
     '/images/mock-outfit-1.jpg',
     '/images/mock-outfit-2.jpg',
@@ -37,7 +39,7 @@ function ProductCard({ product, index }: { product: Product; index: number }) {
             <div className="flex items-center gap-1 bg-[#0a0a0a]/80 backdrop-blur-sm border border-[#C9A84C]/30 rounded-full px-2.5 py-1">
               <Zap className="w-3 h-3 text-[#C9A84C]" fill="#C9A84C" />
               <span className="text-[10px] text-[#C9A84C] font-['Space_Grotesk'] font-medium">
-                {product.similarity}% match
+                {product.similarity}% {t('search_match')}
               </span>
             </div>
           </div>
@@ -97,6 +99,7 @@ function ProductCard({ product, index }: { product: Product; index: number }) {
 
 export default function SearchView() {
   const { uploadedImage, searchResults, isSearching, runVisualSearch, setView } = useAppStore();
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (uploadedImage && searchResults.length === 0 && !isSearching) {
@@ -115,7 +118,7 @@ export default function SearchView() {
           <Search className="w-10 h-10 text-[#333]" />
         </div>
         <h3 className="text-xl font-light text-white font-['Cormorant_Garamond'] mb-2">
-          No outfit uploaded yet
+          {t('search_empty')}
         </h3>
         <p className="text-sm text-[#555] font-['Space_Grotesk'] font-light mb-6 leading-relaxed">
           Upload an outfit first, then AURA will use CLIP embeddings to find visually similar items from our catalog of 50,000+ fashion pieces.
@@ -150,7 +153,7 @@ export default function SearchView() {
             </p>
           </div>
           <h2 className="text-2xl font-light text-white font-['Cormorant_Garamond']">
-            Similar Fashion Items
+            {t('search_results')}
           </h2>
           <p className="text-xs text-[#555] font-['Space_Grotesk'] mt-1">
             CLIP embeddings · ChromaDB vector search · Cosine similarity ranking

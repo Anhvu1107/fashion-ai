@@ -1,36 +1,7 @@
 import { motion } from 'framer-motion';
 import { Upload, MessageSquare, Search, ArrowRight, Sparkles, Zap, Eye, Star } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
-
-const FEATURES = [
-  {
-    icon: Upload,
-    title: 'AI Style Analysis',
-    description: 'Upload any outfit and get instant AI-powered breakdown of style, colors, vibe, and occasion suitability.',
-    action: 'analyze' as const,
-    gradient: 'from-[#C9A84C]/20 to-[#8B6914]/10',
-    border: 'border-[#C9A84C]/30',
-    badge: 'VISION AI',
-  },
-  {
-    icon: MessageSquare,
-    title: 'Stylist Chat',
-    description: 'Chat with AURA — your personal AI fashion stylist trained on luxury editorial knowledge.',
-    action: 'chat' as const,
-    gradient: 'from-purple-900/20 to-purple-900/5',
-    border: 'border-purple-500/20',
-    badge: 'GEMINI LLM',
-  },
-  {
-    icon: Search,
-    title: 'Visual Search',
-    description: 'Find visually similar products from our catalog using CLIP image embeddings and vector search.',
-    action: 'search' as const,
-    gradient: 'from-blue-900/20 to-blue-900/5',
-    border: 'border-blue-500/20',
-    badge: 'CLIP + FAISS',
-  },
-];
+import { useTranslation } from '../hooks/useTranslation';
 
 const STATS = [
   { value: '50K+', label: 'Fashion Items', icon: Star },
@@ -51,6 +22,37 @@ const itemVariants = {
 
 export default function HomeView() {
   const { setView } = useAppStore();
+  const { t } = useTranslation();
+
+  const FEATURES = [
+    {
+      icon: Upload,
+      titleKey: 'feat_vision_title',
+      descriptionKey: 'feat_vision_desc',
+      action: 'analyze' as const,
+      gradient: 'from-[#C9A84C]/20 to-[#8B6914]/10',
+      border: 'border-[#C9A84C]/30',
+      badge: 'VISION AI',
+    },
+    {
+      icon: MessageSquare,
+      titleKey: 'feat_llm_title',
+      descriptionKey: 'feat_llm_desc',
+      action: 'chat' as const,
+      gradient: 'from-purple-900/20 to-purple-900/5',
+      border: 'border-purple-500/20',
+      badge: 'GEMINI LLM',
+    },
+    {
+      icon: Search,
+      titleKey: 'feat_search_title',
+      descriptionKey: 'feat_search_desc',
+      action: 'search' as const,
+      gradient: 'from-blue-900/20 to-blue-900/5',
+      border: 'border-blue-500/20',
+      badge: 'CLIP + FAISS',
+    },
+  ];
 
   return (
     <motion.div
@@ -86,9 +88,7 @@ export default function HomeView() {
               transition={{ delay: 0.3 }}
               className="text-5xl lg:text-6xl font-light text-white mb-4 font-['Cormorant_Garamond'] leading-tight"
             >
-              Your Personal
-              <br />
-              <span className="text-[#C9A84C] italic">AI Stylist</span>
+              {t('home_hero_title')}
             </motion.h1>
 
             <motion.p
@@ -97,8 +97,7 @@ export default function HomeView() {
               transition={{ delay: 0.4 }}
               className="text-[#999] text-base font-['Space_Grotesk'] font-light leading-relaxed mb-8 max-w-lg"
             >
-              Upload your outfit for instant AI analysis. Discover your style DNA, find similar
-              luxury pieces, and chat with your personal stylist — all powered by Gemini & CLIP.
+              {t('home_hero_desc')}
             </motion.p>
 
             <motion.div
@@ -112,7 +111,7 @@ export default function HomeView() {
                 className="flex items-center gap-2 bg-[#C9A84C] hover:bg-[#b8943d] text-black px-6 py-3 rounded-xl font-['Space_Grotesk'] font-medium text-sm transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-[#C9A84C]/20"
               >
                 <Upload className="w-4 h-4" />
-                Analyze My Outfit
+                {t('home_btn_analyze')}
                 <ArrowRight className="w-4 h-4" />
               </button>
               <button
@@ -120,7 +119,7 @@ export default function HomeView() {
                 className="flex items-center gap-2 bg-white/5 hover:bg-white/10 text-white border border-white/10 px-6 py-3 rounded-xl font-['Space_Grotesk'] font-medium text-sm transition-all duration-200"
               >
                 <MessageSquare className="w-4 h-4" />
-                Chat with Stylist
+                {t('home_btn_chat')}
               </button>
             </motion.div>
           </div>
@@ -154,7 +153,7 @@ export default function HomeView() {
           <div className="h-px flex-1 bg-gradient-to-r from-[#C9A84C]/20 to-transparent ml-6" />
         </div>
         <div className="grid md:grid-cols-3 gap-6">
-          {FEATURES.map(({ icon: Icon, title, description, action, gradient, border, badge }) => (
+          {FEATURES.map(({ icon: Icon, titleKey, descriptionKey, action, gradient, border, badge }) => (
             <motion.button
               key={action}
               onClick={() => setView(action)}
@@ -171,10 +170,10 @@ export default function HomeView() {
                 </span>
               </div>
               <h3 className="text-lg font-light text-white mb-2 font-['Cormorant_Garamond']">
-                {title}
+                {t(titleKey as any)}
               </h3>
               <p className="text-sm text-[#666] font-['Space_Grotesk'] font-light leading-relaxed mb-4">
-                {description}
+                {t(descriptionKey as any)}
               </p>
               <div className="flex items-center gap-2 text-[#C9A84C] text-xs font-['Space_Grotesk'] group-hover:gap-3 transition-all">
                 <span>Explore</span>
