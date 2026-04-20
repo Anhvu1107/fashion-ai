@@ -56,7 +56,7 @@ if (-not $repoRoot) {
 
 Set-Location $repoRoot
 
-$interestingChanges = Get-InterestingChanges
+$interestingChanges = @(Get-InterestingChanges)
 if ($interestingChanges.Count -eq 0) {
     Write-Host "No committable changes found outside .agent and .env."
     exit 0
@@ -74,7 +74,7 @@ if (-not $SkipBuild -and (Test-Path "package.json")) {
     }
 }
 
-$pathsToStage = Get-PathsToStage -Changes $interestingChanges
+$pathsToStage = @(Get-PathsToStage -Changes $interestingChanges)
 foreach ($path in $pathsToStage) {
     git add -A -- $path
     if ($LASTEXITCODE -ne 0) {
