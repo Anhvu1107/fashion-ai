@@ -5,9 +5,9 @@ import type {
   ChatMessage,
   ComparisonResult,
   UserProfile,
-  RecommendationBudgetId,
+  ProductAlternative,
 } from '../data/mockProducts';
-import { CHATBOT_RESPONSES, RECOMMENDATION_BUDGETS } from '../data/mockProducts';
+import { CHATBOT_RESPONSES } from '../data/mockProducts';
 
 type AppView = 'home' | 'analyze' | 'chat' | 'search' | 'history' | 'compare';
 type Language = 'en' | 'vi';
@@ -50,9 +50,10 @@ interface AppStore {
   // AI Recommendations (replaces Visual Search)
   recommendations: Recommendation[];
   isSearching: boolean;
-  recommendationBudget: RecommendationBudgetId;
-  setRecommendationBudget: (budget: RecommendationBudgetId) => void;
+  recommendationAlternatives: Record<string, ProductAlternative[]>;
+  loadingAlternativesFor: string | null;
   runVisualSearch: () => Promise<void>;
+  loadRecommendationAlternatives: (recommendation: Recommendation) => Promise<void>;
 
   // Chat
   messages: ChatMessage[];
@@ -330,14 +331,8 @@ Trả về CHỈ JSON hợp lệ (không markdown, không code fence):
 
 // ─── AI Outfit Recommendations ───
 
-function getRecommendationBudget(budgetId: RecommendationBudgetId) {
-  return RECOMMENDATION_BUDGETS.find((budget) => budget.id === budgetId) || RECOMMENDATION_BUDGETS[0];
-}
-
-function buildShoppingQuery(rec: Recommendation, budgetId: RecommendationBudgetId) {
-  const budget = getRecommendationBudget(budgetId);
-  const budgetText = budget.id === 'any' ? '' : budget.labelVi;
-  return [rec.name, rec.brand, rec.color, rec.category, budgetText]
+function buildShoppingQuery(rec: Recommendation) {
+  return [rec.name, rec.brand, rec.color, rec.category]
     .filter(Boolean)
     .join(' ')
     .replace(/\s+/g, ' ')
@@ -348,11 +343,34 @@ function buildShoppingUrl(query: string) {
   return `https://shopee.vn/search?keyword=${encodeURIComponent(query)}`;
 }
 
-function normalizeRecommendations(recommendations: Recommendation[], budgetId: RecommendationBudgetId) {
+function normalizeRecommendations(recommendations: Recommendation[]) {
   return recommendations.slice(0, 6).map((rec) => {
-    const shoppingQuery = rec.shoppingQuery?.trim() || buildShoppingQuery(rec, budgetId);
+    const shoppingQuery = rec.shoppingQuery?.trim() || buildShoppingQuery(rec);
     return {
       ...rec,
+      shoppingQuery,
+      productUrl: buildShoppingUrl(shoppingQuery),
+    };
+  });
+}
+
+function getRecommendationKey(rec: Pick<Recommendation, 'name' | 'brand'>) {
+  return `${rec.name}::${rec.brand}`.toLowerCase();
+}
+
+function buildAlternativeShoppingQuery(alt: ProductAlternative, rec: Recommendation) {
+  return [alt.shoppingQuery, alt.name, alt.brand, rec.category, alt.priceRange]
+    .filter(Boolean)
+    .join(' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function normalizeAlternatives(alternatives: ProductAlternative[], rec: Recommendation) {
+  return alternatives.slice(0, 8).map((alt) => {
+    const shoppingQuery = buildAlternativeShoppingQuery(alt, rec);
+    return {
+      ...alt,
       shoppingQuery,
       productUrl: buildShoppingUrl(shoppingQuery),
     };
@@ -362,13 +380,11 @@ function normalizeRecommendations(recommendations: Recommendation[], budgetId: R
 async function getAIRecommendations(
   imageDataUrl: string,
   analysisResult: AnalysisResult | null,
-  profile: UserProfile,
-  budgetId: RecommendationBudgetId
+  profile: UserProfile
 ): Promise<Recommendation[]> {
   const { apiKey, aiModel } = getGeminiConfig();
   const { mimeType, base64Data } = extractBase64(imageDataUrl);
   const profileCtx = getProfileContext(profile);
-  const budget = getRecommendationBudget(budgetId);
 
   const contextFromAnalysis = analysisResult
     ? `\nKết quả phân tích trước đó: Phong cách "${analysisResult.style}", mood "${analysisResult.vibe}", các món đồ hiện có: ${analysisResult.items.join(', ')}, màu chủ đạo: ${analysisResult.dominantColors.map(c => c.color).join(', ')}.`
@@ -376,14 +392,6 @@ async function getAIRecommendations(
 
   const prompt = `Bạn là chuyên gia tư vấn thời trang. Nhìn vào bộ trang phục trong ảnh và gợi ý 6 món đồ nên MUA THÊM hoặc THAY THẾ để hoàn thiện phong cách.
 ${contextFromAnalysis}${profileCtx}
-
-NGAN SACH NGUOI DUNG DA CHON:
-${budget.labelVi}: ${budget.prompt}
-
-BAT BUOC VE GIA VA LINK:
-- Moi mon phai nam trong ngan sach da chon neu co gioi han.
-- Uu tien san pham/brand pho bien, de mua tai Viet Nam, dung tam gia. Neu budget thap, khong goi y hang xa xi.
-- Khong bia URL san pham cu the. Tra ve shoppingQuery ngan gon de app tao link tim mua tren san thuong mai dien tu.
 
 QUY TẮC:
 1. CHỈ gợi ý dựa trên TRANG PHỤC trong ảnh, không đánh giá background hay chất lượng ảnh.
@@ -419,7 +427,66 @@ Trả về CHỈ JSON hợp lệ (không markdown, không code fence) — một 
 
   const parsed = JSON.parse(cleanedText) as Recommendation[];
   if (!Array.isArray(parsed)) throw new Error("Phản hồi không phải mảng");
-  return normalizeRecommendations(parsed, budgetId);
+  return normalizeRecommendations(parsed);
+}
+
+async function getProductAlternatives(
+  recommendation: Recommendation,
+  analysisResult: AnalysisResult | null,
+  profile: UserProfile
+): Promise<ProductAlternative[]> {
+  const { apiKey, aiModel } = getGeminiConfig();
+  const profileCtx = getProfileContext(profile);
+  const analysisCtx = analysisResult
+    ? `Phong cach outfit: ${analysisResult.style}. Mood: ${analysisResult.vibe}. Mon hien co: ${analysisResult.items.join(', ')}.`
+    : '';
+
+  const prompt = `Ban la stylist thoi trang tai Viet Nam. Nguoi dung thich mon goi y chinh nhung co the khong du ngan sach, vi du thich Gucci nhung can brand re hon cung vibe.
+
+MON GOC CAN GIU LAM THAM CHIEU:
+- Ten: ${recommendation.name}
+- Brand tham chieu: ${recommendation.brand}
+- Loai: ${recommendation.category}
+- Gia tham chieu: ${recommendation.priceRange}
+- Mau/vibe: ${recommendation.color}
+- Ly do hop outfit: ${recommendation.reason}
+${analysisCtx}${profileCtx}
+
+Hay tao 8 lua chon thay the theo cac phan khuc:
+- budget: rat re/de tiep can, thuong duoi 500K
+- lower: re hon mon goc, khoang 500K-1.5M
+- mid: tam trung dang tien, khoang 1.5M-3M
+- premium: cao cap hon nhung khong qua xa xi neu khong can
+- same-vibe: khac brand hoac khac kieu nhung giu vibe/phong cach cua mon goc
+
+QUY TAC:
+1. Khong xoa/ha thap mon goc; hay xem mon goc la reference ve vibe.
+2. Neu brand goc qua dat, goi y brand re hon co vibe tuong tu tai VN nhu Charles & Keith, Pedro, LYN, Vascara, ELLY, Juno, local brand, Shopee Mall, tuy category.
+3. Khong bia URL san pham cu the. Chi tra ve shoppingQuery ngan gon de app tao link tim mua.
+4. reason noi vi sao phu hop outfit. tradeoff noi ro danh doi so voi mon goc, vi du chat lieu, do ben, do sang, logo, form.
+5. Tra ve TIENG VIET co dau trong gia tri JSON.
+
+Tra ve CHI JSON hop le, khong markdown, khong code fence, mot mang 8 phan tu:
+[
+  {
+    "name": "Ten lua chon thay the",
+    "tier": "budget|lower|mid|premium|same-vibe",
+    "brand": "Brand goi y",
+    "priceRange": "300K - 700K",
+    "reason": "Vi sao thay the duoc mon goc",
+    "tradeoff": "Danh doi so voi mon goc",
+    "shoppingQuery": "tu khoa tim mua ngan gon"
+  }
+]`;
+
+  const cleanedText = await callGemini(apiKey, aiModel, {
+    contents: [{ parts: [{ text: prompt }] }],
+    generationConfig: { temperature: 0.45, maxOutputTokens: 3072 },
+  });
+
+  const parsed = JSON.parse(cleanedText) as ProductAlternative[];
+  if (!Array.isArray(parsed)) throw new Error("Phản hồi không phải mảng");
+  return normalizeAlternatives(parsed, recommendation);
 }
 
 // ─── Outfit Comparison ───
@@ -515,7 +582,14 @@ export const useAppStore = create<AppStore>((set, get) => ({
   analysisResult: null,
 
   setUploadedImage: (image, file) =>
-    set({ uploadedImage: image, uploadedFile: file, analysisResult: null, recommendations: [] }),
+    set({
+      uploadedImage: image,
+      uploadedFile: file,
+      analysisResult: null,
+      recommendations: [],
+      recommendationAlternatives: {},
+      loadingAlternativesFor: null,
+    }),
 
   runAnalysis: async () => {
     const { uploadedImage } = get();
@@ -555,21 +629,23 @@ export const useAppStore = create<AppStore>((set, get) => ({
   },
 
   clearAnalysis: () =>
-    set({ uploadedImage: null, uploadedFile: null, analysisResult: null, recommendations: [] }),
+    set({
+      uploadedImage: null,
+      uploadedFile: null,
+      analysisResult: null,
+      recommendations: [],
+      recommendationAlternatives: {},
+      loadingAlternativesFor: null,
+    }),
 
   // AI Recommendations
   recommendations: [],
   isSearching: false,
-  recommendationBudget: 'any',
-  setRecommendationBudget: (budget) =>
-    set((state) =>
-      state.recommendationBudget === budget
-        ? state
-        : { recommendationBudget: budget, recommendations: [] }
-    ),
+  recommendationAlternatives: {},
+  loadingAlternativesFor: null,
 
   runVisualSearch: async () => {
-    const { uploadedImage, analysisResult, recommendationBudget } = get();
+    const { uploadedImage, analysisResult } = get();
     if (!uploadedImage) return;
     set({ isSearching: true });
 
@@ -577,13 +653,39 @@ export const useAppStore = create<AppStore>((set, get) => ({
       const recs = await getAIRecommendations(
         uploadedImage,
         analysisResult,
-        get().userProfile,
-        recommendationBudget
+        get().userProfile
       );
-      set({ isSearching: false, recommendations: recs });
+      set({ isSearching: false, recommendations: recs, recommendationAlternatives: {} });
     } catch (error) {
       console.error("Recommendation Error:", error);
       set({ isSearching: false, recommendations: [] });
+    }
+  },
+
+  loadRecommendationAlternatives: async (recommendation) => {
+    const key = getRecommendationKey(recommendation);
+    const { recommendationAlternatives, analysisResult, loadingAlternativesFor } = get();
+    if (recommendationAlternatives[key] || loadingAlternativesFor === key) return;
+
+    set({ loadingAlternativesFor: key });
+    try {
+      const alternatives = await getProductAlternatives(
+        recommendation,
+        analysisResult,
+        get().userProfile
+      );
+      set((state) => ({
+        recommendationAlternatives: {
+          ...state.recommendationAlternatives,
+          [key]: alternatives,
+        },
+        loadingAlternativesFor: state.loadingAlternativesFor === key ? null : state.loadingAlternativesFor,
+      }));
+    } catch (error) {
+      console.error("Alternative Recommendation Error:", error);
+      set((state) => ({
+        loadingAlternativesFor: state.loadingAlternativesFor === key ? null : state.loadingAlternativesFor,
+      }));
     }
   },
 
