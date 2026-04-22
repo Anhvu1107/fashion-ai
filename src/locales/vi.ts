@@ -15,7 +15,7 @@ export default {
   view_analyze_title: 'Phân tích Trang phục',
   view_analyze_subtitle: 'Tải ảnh lên để AI phân tích phong cách',
   view_chat_title: 'Trò chuyện cùng Stylist AI',
-  view_chat_subtitle: 'Vận hành bởi Gemini LLM',
+  view_chat_subtitle: 'Tư vấn phối đồ và bán hàng thời trang',
   view_search_title: 'Gợi ý phối đồ AI',
   view_search_subtitle: 'Gợi ý phối đồ từ Gemini AI dựa trên trang phục đã upload',
   view_compare_title: 'So sánh Trang phục',
@@ -59,7 +59,7 @@ export default {
 
   // Chat View
   chat_agent_name: 'AURA Stylist',
-  chat_agent_status: 'Trực tuyến · Gemini LLM',
+  chat_agent_status: 'Trực tuyến · Tư vấn phong cách',
   chat_btn_clear: 'Xóa hội thoại',
   chat_quick_prompts: 'Câu hỏi gợi ý',
   chat_quick_prompts_list: [
@@ -71,7 +71,7 @@ export default {
     'Màu sắc nào hợp với làn da của tôi?',
   ] as const,
   chat_placeholder: 'Hỏi stylist của bạn bất cứ điều gì... (Nhấn Shift+Enter để xuống dòng)',
-  chat_disclaimer: 'AURA sử dụng Gemini LLM phân tích xu hướng thời trang · Các phản hồi tạo bởi AI',
+  chat_disclaimer: 'Gợi ý chỉ mang tính tham khảo · Hãy cân nhắc bối cảnh, ngân sách và sở thích cá nhân',
 
   // History View
   history_title: 'Lưu trữ Phong cách',

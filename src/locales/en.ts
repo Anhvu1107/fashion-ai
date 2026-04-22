@@ -15,7 +15,7 @@ export default {
   view_analyze_title: 'Analyze Outfit',
   view_analyze_subtitle: 'Upload & get AI style breakdown',
   view_chat_title: 'AI Stylist Chat',
-  view_chat_subtitle: 'Powered by Gemini LLM',
+  view_chat_subtitle: 'Outfit and fashion sales consulting',
   view_search_title: 'AI Styling Tips',
   view_search_subtitle: 'Outfit pairing suggestions powered by Gemini AI',
   view_compare_title: 'Compare Outfits',
@@ -59,7 +59,7 @@ export default {
 
   // Chat View
   chat_agent_name: 'AURA Stylist',
-  chat_agent_status: 'Online · Gemini LLM',
+  chat_agent_status: 'Online · Style consultant',
   chat_btn_clear: 'Clear chat',
   chat_quick_prompts: 'Quick questions',
   chat_quick_prompts_list: [
@@ -71,7 +71,7 @@ export default {
     'Best colors for my skin tone?',
   ] as const,
   chat_placeholder: 'Ask your stylist anything... (Shift+Enter for new line)',
-  chat_disclaimer: 'AURA uses Gemini LLM for fashion intelligence · Responses are AI-generated style guidance',
+  chat_disclaimer: 'Style suggestions are for reference · Consider context, budget, and personal preference',
 
   // History View
   history_title: 'Style Archives',

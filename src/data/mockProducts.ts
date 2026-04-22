@@ -59,5 +59,5 @@ export interface ChatMessage {
 }
 
 export const CHATBOT_RESPONSES: Record<string, string> = {
-  default: "I'm AURA, your AI fashion stylist. Upload an outfit photo and I'll analyze your style, or ask me anything about fashion, styling, and outfit planning!",
+  default: "Chào bạn, mình là AURA. Mình có thể tư vấn phối đồ theo dịp, dáng người, màu da, ngân sách, hoặc hỗ trợ kịch bản bán hàng thời trang. Bạn đang cần chọn outfit cho tình huống nào?",
 };
