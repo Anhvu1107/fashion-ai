@@ -31,7 +31,56 @@ export interface Recommendation {
   reason: string;
   color: string;
   priority: 'high' | 'medium' | 'low';
+  shoppingQuery?: string;
+  productUrl?: string;
 }
+
+export type RecommendationBudgetId =
+  | 'any'
+  | 'under-300k'
+  | '300k-700k'
+  | '700k-1500k'
+  | '1500k-3000k';
+
+export interface RecommendationBudget {
+  id: RecommendationBudgetId;
+  labelVi: string;
+  labelEn: string;
+  prompt: string;
+}
+
+export const RECOMMENDATION_BUDGETS: RecommendationBudget[] = [
+  {
+    id: 'any',
+    labelVi: 'Linh hoạt',
+    labelEn: 'Flexible',
+    prompt: 'Không giới hạn ngân sách, nhưng vẫn ưu tiên món đáng tiền và dễ mua tại Việt Nam.',
+  },
+  {
+    id: 'under-300k',
+    labelVi: 'Dưới 300K',
+    labelEn: 'Under 300K',
+    prompt: 'Mỗi món nên dưới 300K VND. Ưu tiên lựa chọn bình dân, dễ tìm trên sàn thương mại điện tử hoặc local shop.',
+  },
+  {
+    id: '300k-700k',
+    labelVi: '300K-700K',
+    labelEn: '300K-700K',
+    prompt: 'Mỗi món nên nằm trong khoảng 300K-700K VND. Ưu tiên lựa chọn chất lượng ổn, dễ mua tại Việt Nam.',
+  },
+  {
+    id: '700k-1500k',
+    labelVi: '700K-1.5M',
+    labelEn: '700K-1.5M',
+    prompt: 'Mỗi món nên nằm trong khoảng 700K-1.5M VND. Ưu tiên lựa chọn tầm trung, bền và có tính ứng dụng cao.',
+  },
+  {
+    id: '1500k-3000k',
+    labelVi: '1.5M-3M',
+    labelEn: '1.5M-3M',
+    prompt: 'Mỗi món nên nằm trong khoảng 1.5M-3M VND. Ưu tiên lựa chọn cao cấp vừa phải, không gợi ý xa xỉ quá mức.',
+  },
+];
 
 export interface ComparisonItem {
   index: number;

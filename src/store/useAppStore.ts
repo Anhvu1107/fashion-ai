@@ -1,6 +1,13 @@
 import { create } from 'zustand';
-import type { AnalysisResult, Recommendation, ChatMessage, ComparisonResult, UserProfile } from '../data/mockProducts';
-import { CHATBOT_RESPONSES } from '../data/mockProducts';
+import type {
+  AnalysisResult,
+  Recommendation,
+  ChatMessage,
+  ComparisonResult,
+  UserProfile,
+  RecommendationBudgetId,
+} from '../data/mockProducts';
+import { CHATBOT_RESPONSES, RECOMMENDATION_BUDGETS } from '../data/mockProducts';
 
 type AppView = 'home' | 'analyze' | 'chat' | 'search' | 'history' | 'compare';
 type Language = 'en' | 'vi';
@@ -43,6 +50,8 @@ interface AppStore {
   // AI Recommendations (replaces Visual Search)
   recommendations: Recommendation[];
   isSearching: boolean;
+  recommendationBudget: RecommendationBudgetId;
+  setRecommendationBudget: (budget: RecommendationBudgetId) => void;
   runVisualSearch: () => Promise<void>;
 
   // Chat
@@ -321,10 +330,45 @@ Trả về CHỈ JSON hợp lệ (không markdown, không code fence):
 
 // ─── AI Outfit Recommendations ───
 
-async function getAIRecommendations(imageDataUrl: string, analysisResult: AnalysisResult | null, profile: UserProfile): Promise<Recommendation[]> {
+function getRecommendationBudget(budgetId: RecommendationBudgetId) {
+  return RECOMMENDATION_BUDGETS.find((budget) => budget.id === budgetId) || RECOMMENDATION_BUDGETS[0];
+}
+
+function buildShoppingQuery(rec: Recommendation, budgetId: RecommendationBudgetId) {
+  const budget = getRecommendationBudget(budgetId);
+  const budgetText = budget.id === 'any' ? '' : budget.labelVi;
+  return [rec.name, rec.brand, rec.color, rec.category, budgetText]
+    .filter(Boolean)
+    .join(' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function buildShoppingUrl(query: string) {
+  return `https://shopee.vn/search?keyword=${encodeURIComponent(query)}`;
+}
+
+function normalizeRecommendations(recommendations: Recommendation[], budgetId: RecommendationBudgetId) {
+  return recommendations.slice(0, 6).map((rec) => {
+    const shoppingQuery = rec.shoppingQuery?.trim() || buildShoppingQuery(rec, budgetId);
+    return {
+      ...rec,
+      shoppingQuery,
+      productUrl: buildShoppingUrl(shoppingQuery),
+    };
+  });
+}
+
+async function getAIRecommendations(
+  imageDataUrl: string,
+  analysisResult: AnalysisResult | null,
+  profile: UserProfile,
+  budgetId: RecommendationBudgetId
+): Promise<Recommendation[]> {
   const { apiKey, aiModel } = getGeminiConfig();
   const { mimeType, base64Data } = extractBase64(imageDataUrl);
   const profileCtx = getProfileContext(profile);
+  const budget = getRecommendationBudget(budgetId);
 
   const contextFromAnalysis = analysisResult
     ? `\nKết quả phân tích trước đó: Phong cách "${analysisResult.style}", mood "${analysisResult.vibe}", các món đồ hiện có: ${analysisResult.items.join(', ')}, màu chủ đạo: ${analysisResult.dominantColors.map(c => c.color).join(', ')}.`
@@ -332,6 +376,14 @@ async function getAIRecommendations(imageDataUrl: string, analysisResult: Analys
 
   const prompt = `Bạn là chuyên gia tư vấn thời trang. Nhìn vào bộ trang phục trong ảnh và gợi ý 6 món đồ nên MUA THÊM hoặc THAY THẾ để hoàn thiện phong cách.
 ${contextFromAnalysis}${profileCtx}
+
+NGAN SACH NGUOI DUNG DA CHON:
+${budget.labelVi}: ${budget.prompt}
+
+BAT BUOC VE GIA VA LINK:
+- Moi mon phai nam trong ngan sach da chon neu co gioi han.
+- Uu tien san pham/brand pho bien, de mua tai Viet Nam, dung tam gia. Neu budget thap, khong goi y hang xa xi.
+- Khong bia URL san pham cu the. Tra ve shoppingQuery ngan gon de app tao link tim mua tren san thuong mai dien tu.
 
 QUY TẮC:
 1. CHỈ gợi ý dựa trên TRANG PHỤC trong ảnh, không đánh giá background hay chất lượng ảnh.
@@ -350,7 +402,8 @@ Trả về CHỈ JSON hợp lệ (không markdown, không code fence) — một 
     "priceRange": "500K - 1.5M",
     "reason": "Giải thích ngắn gọn tại sao nên phối với outfit hiện tại",
     "color": "Màu gợi ý phối",
-    "priority": "high|medium|low"
+    "priority": "high|medium|low",
+    "shoppingQuery": "tu khoa tim mua ngan gon, vi du: blazer dang suong den nu 300K 700K"
   }
 ]`;
 
@@ -366,7 +419,7 @@ Trả về CHỈ JSON hợp lệ (không markdown, không code fence) — một 
 
   const parsed = JSON.parse(cleanedText) as Recommendation[];
   if (!Array.isArray(parsed)) throw new Error("Phản hồi không phải mảng");
-  return parsed.slice(0, 6);
+  return normalizeRecommendations(parsed, budgetId);
 }
 
 // ─── Outfit Comparison ───
@@ -507,14 +560,26 @@ export const useAppStore = create<AppStore>((set, get) => ({
   // AI Recommendations
   recommendations: [],
   isSearching: false,
+  recommendationBudget: 'any',
+  setRecommendationBudget: (budget) =>
+    set((state) =>
+      state.recommendationBudget === budget
+        ? state
+        : { recommendationBudget: budget, recommendations: [] }
+    ),
 
   runVisualSearch: async () => {
-    const { uploadedImage, analysisResult } = get();
+    const { uploadedImage, analysisResult, recommendationBudget } = get();
     if (!uploadedImage) return;
     set({ isSearching: true });
 
     try {
-      const recs = await getAIRecommendations(uploadedImage, analysisResult, get().userProfile);
+      const recs = await getAIRecommendations(
+        uploadedImage,
+        analysisResult,
+        get().userProfile,
+        recommendationBudget
+      );
       set({ isSearching: false, recommendations: recs });
     } catch (error) {
       console.error("Recommendation Error:", error);

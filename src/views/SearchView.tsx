@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 import type { Recommendation } from '../data/mockProducts';
+import { RECOMMENDATION_BUDGETS } from '../data/mockProducts';
 import { useTranslation } from '../hooks/useTranslation';
 
 const PRIORITY_STYLES = {
@@ -89,24 +90,38 @@ function RecommendationCard({ rec, index }: { rec: Recommendation; index: number
           {rec.priceRange}
           <span className="text-[10px] text-[#444] ml-1 font-['Space_Grotesk']">VNĐ</span>
         </p>
-        <button className="flex items-center gap-1 text-[10px] text-[#666] hover:text-[#C9A84C] font-['Space_Grotesk'] transition-colors">
+        <a
+          href={rec.productUrl}
+          target="_blank"
+          rel="noreferrer"
+          className="flex items-center gap-1 text-[10px] text-[#666] hover:text-[#C9A84C] font-['Space_Grotesk'] transition-colors"
+        >
           Tìm mua
           <ArrowUpRight className="w-3 h-3" />
-        </button>
+        </a>
       </div>
     </motion.div>
   );
 }
 
 export default function SearchView() {
-  const { uploadedImage, recommendations, isSearching, runVisualSearch, setView } = useAppStore();
+  const {
+    uploadedImage,
+    recommendations,
+    isSearching,
+    recommendationBudget,
+    setRecommendationBudget,
+    runVisualSearch,
+    setView,
+    language,
+  } = useAppStore();
   const { t } = useTranslation();
 
   useEffect(() => {
     if (uploadedImage && recommendations.length === 0 && !isSearching) {
       runVisualSearch();
     }
-  }, [uploadedImage]);
+  }, [uploadedImage, recommendationBudget]);
 
   if (!uploadedImage) {
     return (
@@ -169,6 +184,37 @@ export default function SearchView() {
             Gợi ý lại
           </button>
         )}
+      </div>
+
+      {/* Budget Controls */}
+      <div className="mb-6">
+        <div className="flex items-center justify-between gap-3 mb-3">
+          <p className="text-[10px] text-[#777] font-['Space_Grotesk'] tracking-[0.15em] uppercase">
+            {language === 'vi' ? 'Tầm giá mỗi món' : 'Budget per item'}
+          </p>
+          <p className="text-[10px] text-[#444] font-['Space_Grotesk']">
+            {language === 'vi' ? 'Đổi tầm giá sẽ tạo lại gợi ý' : 'Changing budget refreshes suggestions'}
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {RECOMMENDATION_BUDGETS.map((budget) => {
+            const active = budget.id === recommendationBudget;
+            return (
+              <button
+                key={budget.id}
+                onClick={() => setRecommendationBudget(budget.id)}
+                disabled={isSearching}
+                className={`min-h-9 px-3 rounded-lg border text-xs font-['Space_Grotesk'] transition-all disabled:opacity-50 ${
+                  active
+                    ? 'border-[#C9A84C] bg-[#C9A84C]/15 text-[#C9A84C]'
+                    : 'border-[#222] bg-[#111] text-[#666] hover:border-[#C9A84C]/40 hover:text-[#C9A84C]'
+                }`}
+              >
+                {language === 'vi' ? budget.labelVi : budget.labelEn}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Loading State */}
