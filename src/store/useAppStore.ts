@@ -144,12 +144,12 @@ function normalizeChatText(value: string) {
 function isFashionRelated(text: string) {
   return [
     /\b(thoi trang|fashion|style|stylist|phong cach|aesthetic|quiet luxury|capsule)\b/,
-    /\b(trang phuc|outfit|look|set do|phoi do|mix do|goi y do|do mac|len do|chon do|mac gi|mac sao|mac dep|nen mac)\b/,
+    /\b(trang phuc|outfit|look|set do|bo do|phoi do|mix do|goi y do|do mac|do di|len do|chon do|mac gi|mac sao|mac dep|nen mac)\b/,
     /\b(ao|quan|vay|dam|chan vay|so mi|blazer|vest|suit|jean|denim|hoodie|cardigan|ao khoac)\b/,
     /\b(giay|sneaker|boot|sandal|tui|tui xach|that lung|dong ho|kinh|phu kien)\b/,
     /\b(size|form|fit|chat lieu|vai|cotton|linen|lua|len|da|mau|mau da|tone da|bang mau)\b/,
     /\b(voc dang|dang nguoi|cao|can nang|vong eo|vong 1|vong 2|vong 3)\b/,
-    /\b(cong so|di lam|phong van|hen ho|du tiec|gala|cuoi|du lich|di choi|di hoc|di gap|gap nyc|nguoi yeu cu|crush|ra mat|di cafe|di an|di xem phim)\b/,
+    /\b(cong so|di lam|phong van|hen ho|du tiec|gala|cuoi|dam cuoi|tiec cuoi|le cuoi|wedding|black tie|formal|du lich|di choi|di hoc|di gap|gap nyc|nguoi yeu cu|crush|ra mat|di cafe|di an|di xem phim)\b/,
     /\b(shop|khach|tu van khach|chot don|san pham|local brand|brand|bo suu tap|ton kho)\b/,
   ].some((pattern) => pattern.test(text));
 }
@@ -252,8 +252,9 @@ function buildChatSystemInstruction(profile: UserProfile): string {
 
 PHẠM VI BẮT BUỘC:
 - Chỉ trả lời câu hỏi thuộc lĩnh vực thời trang: trang phục, phối đồ, màu sắc, dáng người, chất liệu, phụ kiện, xu hướng mặc, chăm sóc tủ đồ, hoặc bán hàng thời trang.
-- Tuyệt đối không trả lời kiến thức ngoài thời trang như lập trình, toán, lịch sử, chính trị, y tế, pháp lý, tài chính, công nghệ, đời sống chung hoặc giải trí không liên quan đến trang phục.
-- Nếu câu hỏi ngoài phạm vi, từ chối trong 1 câu và mời người dùng hỏi lại về outfit/thời trang. Không cung cấp câu trả lời cho chủ đề ngoài phạm vi.
+- Một câu hỏi được xem là thuộc thời trang nếu người dùng đang hỏi nên mặc gì, chọn bộ đồ, phối đồ, dự tiệc, đi làm, đi chơi, đi cưới, chọn màu/form/chất liệu, dù câu đó có nhắc thêm người nổi tiếng, chính trị gia, nhân vật hư cấu, địa điểm hoặc bối cảnh kỳ quặc.
+- Nếu câu hỏi có cả thời trang và yếu tố ngoài thời trang, hãy trả lời phần thời trang. Không bình luận về chính trị, đời tư, lịch sử, pháp lý hay nhân vật được nhắc đến; chỉ dùng bối cảnh đó để suy ra mức độ trang trọng, dress code và vibe.
+- Chỉ từ chối khi câu hỏi KHÔNG có yêu cầu thời trang rõ ràng. Khi từ chối, nói 1 câu ngắn và mời người dùng hỏi lại về outfit/thời trang.
 
 Mục tiêu:
 - Tư vấn phối đồ theo dịp, vóc dáng, màu da, ngân sách, thời tiết, độ tuổi, môi trường làm việc và phong cách cá nhân.
@@ -267,7 +268,7 @@ Quy tắc trả lời:
 4. Nếu thiếu thông tin quan trọng, hỏi tối đa 1-2 câu ngắn. Nếu vẫn có thể giúp, đưa gợi ý theo giả định hợp lý.
 5. Khi tư vấn outfit, ưu tiên cấu trúc: tổng hướng phối, món chính, màu/chất liệu, phụ kiện, lưu ý form dáng.
 6. Khi tư vấn bán hàng, giữ giọng chuyên nghiệp, không thao túng khách, không hứa kết quả chắc chắn.
-7. Tránh lan man về AI, công nghệ, chính sách, hoặc kiến thức ngoài thời trang. Với câu hỏi ngoài phạm vi, không trả lời nội dung đó; chỉ nói rằng AURA chuyên về thời trang và hỏi người dùng cần tư vấn outfit nào.
+7. Tránh lan man về AI, công nghệ, chính sách, hoặc kiến thức ngoài thời trang. Nếu câu hỏi có intent outfit, vẫn tư vấn outfit và bỏ qua phần ngoài ngành.
 8. Giọng văn: tinh tế, thẳng vào việc, thân thiện, không dùng quá nhiều icon.
 
 Định dạng:
