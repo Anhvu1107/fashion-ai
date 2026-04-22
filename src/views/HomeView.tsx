@@ -1,14 +1,7 @@
 import { motion } from 'framer-motion';
-import { Upload, MessageSquare, Search, ArrowRight, Sparkles, Zap, Eye, Star } from 'lucide-react';
+import { Upload, MessageSquare, Search, ArrowRight, Sparkles } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 import { useTranslation } from '../hooks/useTranslation';
-
-const STATS = [
-  { value: '50K+', label: 'Fashion Items', icon: Star },
-  { value: '99.2%', label: 'Accuracy Score', icon: Zap },
-  { value: '<2s', label: 'Analysis Time', icon: Eye },
-  { value: '15+', label: 'Style Categories', icon: Sparkles },
-];
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -32,7 +25,7 @@ export default function HomeView() {
       action: 'analyze' as const,
       gradient: 'from-[#C9A84C]/20 to-[#8B6914]/10',
       border: 'border-[#C9A84C]/30',
-      badge: 'VISION AI',
+      badge: 'GEMINI AI',
     },
     {
       icon: MessageSquare,
@@ -50,7 +43,7 @@ export default function HomeView() {
       action: 'search' as const,
       gradient: 'from-blue-900/20 to-blue-900/5',
       border: 'border-blue-500/20',
-      badge: 'CLIP + FAISS',
+      badge: 'GEMINI AI',
     },
   ];
 
@@ -126,24 +119,6 @@ export default function HomeView() {
         </div>
       </motion.div>
 
-      {/* Stats Row */}
-      <motion.div variants={itemVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {STATS.map(({ value, label, icon: Icon }) => (
-          <div
-            key={label}
-            className="bg-[#111] border border-[#C9A84C]/10 rounded-2xl p-5 flex items-center gap-4"
-          >
-            <div className="w-10 h-10 rounded-xl bg-[#C9A84C]/10 flex items-center justify-center flex-shrink-0">
-              <Icon className="w-5 h-5 text-[#C9A84C]" />
-            </div>
-            <div>
-              <p className="text-xl font-light text-white font-['Cormorant_Garamond']">{value}</p>
-              <p className="text-[11px] text-[#555] font-['Space_Grotesk'] tracking-wide">{label}</p>
-            </div>
-          </div>
-        ))}
-      </motion.div>
-
       {/* Feature Cards */}
       <motion.div variants={itemVariants}>
         <div className="flex items-center justify-between mb-6">
@@ -191,10 +166,10 @@ export default function HomeView() {
         </h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
-            { layer: 'Frontend', tech: 'React · Vite · Tailwind · Framer Motion' },
-            { layer: 'AI Vision', tech: 'Gemini Vision API · CLIP Embeddings' },
-            { layer: 'Vector Search', tech: 'ChromaDB · FAISS · Cosine Similarity' },
-            { layer: 'Backend', tech: 'FastAPI · Python · Supabase · PostgreSQL' },
+            { layer: 'Frontend', tech: 'React · TypeScript · Vite · Framer Motion' },
+            { layer: 'AI Engine', tech: 'Gemini API · Vision Analysis · LLM Chat' },
+            { layer: 'Styling', tech: 'Tailwind CSS · Responsive Design' },
+            { layer: 'Tooling', tech: 'Zustand · React Dropzone · Lucide Icons' },
           ].map(({ layer, tech }) => (
             <div key={layer} className="space-y-1">
               <p className="text-[10px] text-[#C9A84C] font-['Space_Grotesk'] tracking-[0.15em] uppercase">

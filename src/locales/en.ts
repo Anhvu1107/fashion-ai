@@ -3,7 +3,8 @@ export default {
   nav_overview: 'Overview',
   nav_analyze: 'Analyze Outfit',
   nav_chat: 'AI Stylist Chat',
-  nav_search: 'Visual Search',
+  nav_search: 'AI Recommendations',
+  nav_compare: 'Compare Outfits',
   nav_history: 'Recent Analyses',
   nav_title_navigation: 'Navigation',
   
@@ -15,8 +16,10 @@ export default {
   view_analyze_subtitle: 'Upload & get AI style breakdown',
   view_chat_title: 'AI Stylist Chat',
   view_chat_subtitle: 'Powered by Gemini LLM',
-  view_search_title: 'Visual Search',
-  view_search_subtitle: 'Find similar items via CLIP embeddings',
+  view_search_title: 'AI Styling Tips',
+  view_search_subtitle: 'Outfit pairing suggestions powered by Gemini AI',
+  view_compare_title: 'Compare Outfits',
+  view_compare_subtitle: 'AI compares multiple outfits side by side',
   view_history_title: 'Style History',
   view_history_subtitle: 'Your recent outfit analyses',
 
@@ -32,21 +35,21 @@ export default {
   home_btn_chat: 'Consult Stylist',
 
   // Feature Cards
-  feat_vision_title: 'Computer Vision',
-  feat_vision_desc: 'Deep aesthetic analysis of your outfit structure, color harmony, and style taxonomy.',
+  feat_vision_title: 'AI Vision Analysis',
+  feat_vision_desc: 'Deep analysis of your outfit structure, color harmony, and style taxonomy powered by Gemini AI.',
   feat_llm_title: 'Gemini Intelligence',
   feat_llm_desc: "Contextual styling advice powered by Google's most capable language model.",
-  feat_search_title: 'CLIP Embeddings',
-  feat_search_desc: 'Neural visual search to discover identical or structurally similar fashion items.',
+  feat_search_title: 'AI Outfit Pairing',
+  feat_search_desc: 'Get personalized outfit pairing suggestions based on your uploaded look.',
 
   // Analyze View
-  analyze_title: 'Style Analysis Pipeline',
+  analyze_title: 'Style Analysis',
   analyze_upload_title: 'Upload Outfit',
   analyze_drag_drop: 'Drag & drop your photo here',
   analyze_formats: 'Supports JPG, PNG, WEBP (Max 5MB)',
   analyze_btn_select: 'Select File',
   analyze_btn_start: 'Start Analysis',
-  analyze_analyzing: 'Processing image through neural networks...',
+  analyze_analyzing: 'Gemini AI is analyzing your outfit...',
   analyze_result_title: 'Aesthetic Breakdown',
   analyze_color_palette: 'DOMINANT PALETTE',
   analyze_key_items: 'KEY ITEMS',
@@ -78,10 +81,10 @@ export default {
   history_btn_view: 'View Details',
 
   // Search View
-  search_title: 'AI Visual Search',
-  search_subtitle: 'Find similar pieces from global catalogs',
-  search_empty: 'Upload an image to find similar items',
-  search_searching: 'Extracting visual embeddings and searching catalog...',
-  search_results: 'Similar Items Found',
+  search_title: 'AI Outfit Pairing',
+  search_subtitle: 'Personalized suggestions from Gemini AI',
+  search_empty: 'Upload an outfit to get pairing suggestions',
+  search_searching: 'AI is analyzing your style and generating suggestions...',
+  search_results: 'AI Recommendations',
   search_match: 'Match',
 };

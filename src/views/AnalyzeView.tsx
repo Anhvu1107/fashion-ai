@@ -71,7 +71,7 @@ function AnalyzingOverlay() {
         </svg>
       </div>
       <p className="text-white font-['Space_Grotesk'] text-sm mb-1">{t('analyze_analyzing')}</p>
-      <p className="text-[#555] font-['Space_Grotesk'] text-xs">Running Gemini Vision · CLIP · StyleNet</p>
+      <p className="text-[#555] font-['Space_Grotesk'] text-xs">Gemini AI đang phân tích trang phục...</p>
       <div className="flex gap-1.5 mt-4">
         {[0, 0.2, 0.4].map((delay, i) => (
           <motion.div

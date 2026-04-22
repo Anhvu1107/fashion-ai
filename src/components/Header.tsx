@@ -1,10 +1,12 @@
-import { Menu, Bell, Settings, Languages } from 'lucide-react';
+import { Menu, Bell, Settings, Languages, User } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 import { useTranslation } from '../hooks/useTranslation';
 
 export default function Header() {
-  const { currentView, toggleSidebar, toggleLanguage } = useAppStore();
+  const { currentView, toggleSidebar, toggleLanguage, toggleProfile, userProfile } = useAppStore();
   const { t, language } = useTranslation();
+
+  const hasProfile = Object.values(userProfile).some((v) => v.trim() !== '');
 
   const getViewTitle = (view: string) => {
     switch (view) {
@@ -12,6 +14,7 @@ export default function Header() {
       case 'analyze': return { title: t('view_analyze_title'), subtitle: t('view_analyze_subtitle') };
       case 'chat': return { title: t('view_chat_title'), subtitle: t('view_chat_subtitle') };
       case 'search': return { title: t('view_search_title'), subtitle: t('view_search_subtitle') };
+      case 'compare': return { title: t('view_compare_title'), subtitle: t('view_compare_subtitle') };
       case 'history': return { title: t('view_history_title'), subtitle: t('view_history_subtitle') };
       default: return { title: t('view_home_title'), subtitle: t('view_home_subtitle') };
     }
@@ -57,10 +60,19 @@ export default function Header() {
         <button className="hidden sm:flex w-8 h-8 items-center justify-center text-[#555] hover:text-[#C9A84C] transition-colors rounded-lg hover:bg-[#C9A84C]/10">
           <Bell className="w-4 h-4" />
         </button>
-        <button className="hidden sm:flex w-8 h-8 items-center justify-center text-[#555] hover:text-[#C9A84C] transition-colors rounded-lg hover:bg-[#C9A84C]/10">
-          <Settings className="w-4 h-4" />
+
+        {/* Profile / Settings */}
+        <button
+          onClick={toggleProfile}
+          className="relative hidden sm:flex w-8 h-8 items-center justify-center text-[#555] hover:text-[#C9A84C] transition-colors rounded-lg hover:bg-[#C9A84C]/10"
+        >
+          <User className="w-4 h-4" />
+          {hasProfile && (
+            <div className="absolute top-1 right-1 w-2 h-2 rounded-full bg-[#C9A84C]" />
+          )}
         </button>
       </div>
     </header>
   );
 }
+

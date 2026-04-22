@@ -7,6 +7,7 @@ import {
   Clock,
   X,
   Zap,
+  GitCompareArrows,
 } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 import { useTranslation } from '../hooks/useTranslation';
@@ -14,6 +15,7 @@ import { useTranslation } from '../hooks/useTranslation';
 const NAV_ITEMS_KEYS = [
   { id: 'home', labelKey: 'nav_overview', icon: Sparkles },
   { id: 'analyze', labelKey: 'nav_analyze', icon: Upload },
+  { id: 'compare', labelKey: 'nav_compare', icon: GitCompareArrows },
   { id: 'chat', labelKey: 'nav_chat', icon: MessageSquare },
   { id: 'search', labelKey: 'nav_search', icon: Search },
   { id: 'history', labelKey: 'nav_history', icon: Clock },
@@ -89,7 +91,7 @@ export default function Sidebar() {
               <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
               <span className="text-xs text-[#888] font-['Space_Grotesk']">{t('sidebar_ai_active')}</span>
             </div>
-            <p className="text-[10px] text-[#555] font-['Space_Grotesk']">Gemini Vision · CLIP · ChromaDB</p>
+            <p className="text-[10px] text-[#555] font-['Space_Grotesk']">Gemini AI · Vision API</p>
           </div>
           <a href="https://github.com" target="_blank" rel="noopener noreferrer"
             className="flex items-center gap-2 text-xs text-[#555] hover:text-[#C9A84C] transition-colors font-['Space_Grotesk'] px-1">
@@ -178,7 +180,7 @@ export default function Sidebar() {
               <span className="text-xs text-[#888] font-['Space_Grotesk']">{t('sidebar_ai_active')}</span>
             </div>
             <p className="text-[10px] text-[#555] font-['Space_Grotesk']">
-              Gemini Vision · CLIP · ChromaDB
+              Gemini AI · Vision API
             </p>
           </div>
           <a

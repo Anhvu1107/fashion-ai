@@ -3,7 +3,8 @@ export default {
   nav_overview: 'Trang chủ',
   nav_analyze: 'Phân tích Trang phục',
   nav_chat: 'Trợ lí AI',
-  nav_search: 'Tìm qua hình ảnh',
+  nav_search: 'Gợi ý phối đồ',
+  nav_compare: 'So sánh trang phục',
   nav_history: 'Lịch sử',
   nav_title_navigation: 'Điều hướng',
   
@@ -15,8 +16,10 @@ export default {
   view_analyze_subtitle: 'Tải ảnh lên để AI phân tích phong cách',
   view_chat_title: 'Trò chuyện cùng Stylist AI',
   view_chat_subtitle: 'Vận hành bởi Gemini LLM',
-  view_search_title: 'Tìm kiếm Bằng hình ảnh',
-  view_search_subtitle: 'Tìm các món đồ tương tự qua CLIP embeddings',
+  view_search_title: 'Gợi ý phối đồ AI',
+  view_search_subtitle: 'Gợi ý phối đồ từ Gemini AI dựa trên trang phục đã upload',
+  view_compare_title: 'So sánh Trang phục',
+  view_compare_subtitle: 'AI so sánh nhiều bộ trang phục cạnh nhau',
   view_history_title: 'Lịch sử Phong cách',
   view_history_subtitle: 'Các trang phục bạn đã phân tích gần đây',
 
@@ -32,12 +35,12 @@ export default {
   home_btn_chat: 'Hỏi Stylist',
 
   // Feature Cards
-  feat_vision_title: 'Thị giác Máy tính',
-  feat_vision_desc: 'Phân tích sâu cấu trúc trang phục, sự hài hoà màu sắc và phân loại phong cách.',
+  feat_vision_title: 'Phân tích bằng AI',
+  feat_vision_desc: 'Phân tích sâu cấu trúc trang phục, sự hài hoà màu sắc và phân loại phong cách bằng Gemini AI.',
   feat_llm_title: 'Trí tuệ Gemini',
   feat_llm_desc: 'Tư vấn bối cảnh và định hướng thời trang vận hành bởi mô hình ngôn ngữ thông minh.',
-  feat_search_title: 'CLIP Embeddings',
-  feat_search_desc: 'Tìm kiếm bằng hình ảnh để khám phá các món đồ giống hoặc tương đồng.',
+  feat_search_title: 'Gợi ý phối đồ AI',
+  feat_search_desc: 'Nhận gợi ý phối đồ cá nhân hoá dựa trên trang phục bạn đã upload.',
 
   // Analyze View
   analyze_title: 'Tiến trình Phân tích Phong cách',
@@ -46,12 +49,12 @@ export default {
   analyze_formats: 'Hỗ trợ JPG, PNG, WEBP (Tối đa 5MB)',
   analyze_btn_select: 'Chọn Tệp',
   analyze_btn_start: 'Bắt đầu Phân tích',
-  analyze_analyzing: 'Đang gửi tín hiệu lên hệ thống nơ-ron...',
+  analyze_analyzing: 'Gemini AI đang phân tích trang phục...',
   analyze_result_title: 'Báo cáo Thẩm mỹ',
   analyze_color_palette: 'BẢNG MÀU CHỦ ĐẠO',
   analyze_key_items: 'MÓN ĐỒ CHÍNH',
   analyze_occasions: 'NGỮ CẢNH PHÙ HỢP',
-  analyze_style_tips: 'LƯU Ý PHỐI BỒ',
+  analyze_style_tips: 'LƯU Ý PHỐI ĐỒ',
   analyze_score: 'Điểm',
 
   // Chat View
@@ -78,10 +81,10 @@ export default {
   history_btn_view: 'Xem Chi tiết',
 
   // Search View
-  search_title: 'Tìm kiếm Hình ảnh AI',
-  search_subtitle: 'Tìm các món đồ tương tự trên danh mục toàn cầu',
-  search_empty: 'Tải một bức ảnh lên để tìm kiếm',
-  search_searching: 'Đang trích xuất đặc trưng và tìm trên dữ liệu...',
-  search_results: 'Các kết quả phát hiện',
+  search_title: 'Gợi ý phối đồ AI',
+  search_subtitle: 'Gợi ý cá nhân hoá từ Gemini AI',
+  search_empty: 'Tải ảnh trang phục lên để nhận gợi ý phối đồ',
+  search_searching: 'AI đang phân tích phong cách và tạo gợi ý...',
+  search_results: 'Gợi ý từ AI',
   search_match: 'Độ khớp',
 };

@@ -6,6 +6,8 @@ import AnalyzeView from './views/AnalyzeView';
 import ChatView from './views/ChatView';
 import SearchView from './views/SearchView';
 import HistoryView from './views/HistoryView';
+import CompareView from './views/CompareView';
+import ProfileModal from './components/ProfileModal';
 import { useAppStore } from './store/useAppStore';
 
 const pageVariants = {
@@ -29,6 +31,8 @@ export default function App() {
         return <SearchView />;
       case 'history':
         return <HistoryView />;
+      case 'compare':
+        return <CompareView />;
       default:
         return <HomeView />;
     }
@@ -66,6 +70,9 @@ export default function App() {
           </div>
         </main>
       </div>
+
+      {/* Profile Modal */}
+      <ProfileModal />
     </div>
   );
 }
