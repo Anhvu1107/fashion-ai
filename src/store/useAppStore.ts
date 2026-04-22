@@ -162,19 +162,6 @@ function isGeneralChat(text: string) {
   ].some((pattern) => pattern.test(text));
 }
 
-function isContextualFashionFollowUp(text: string) {
-  return [
-    /^(ua|sao|roi|the thi|vay thi)\b/,
-    /\b(dang hoi|hoi luon|y la|cau tren|cai tren|vua hoi|tiep|them|cu the hon|noi ro|lam lai)\b/,
-  ].some((pattern) => pattern.test(text));
-}
-
-function hasRecentFashionContext(messages: ChatMessage[]) {
-  return messages
-    .slice(-4)
-    .some((message) => message.role === 'user' && isFashionRelated(normalizeChatText(message.content)));
-}
-
 function getChatIntroMessage(language: Language): ChatMessage {
   return {
     id: '0',
@@ -184,7 +171,7 @@ function getChatIntroMessage(language: Language): ChatMessage {
   };
 }
 
-function getLocalizedChatReply(language: Language, key: 'internal' | 'genericSales' | 'outOfScope') {
+function getLocalizedChatReply(language: Language, key: 'internal' | 'genericSales') {
   const replies = {
     en: {
       internal: [
@@ -193,8 +180,6 @@ function getLocalizedChatReply(language: Language, key: 'internal' | 'genericSal
       ].join('\n\n'),
       genericSales:
         'I can help with sales only inside the fashion context: size, fit, fabric, outfit pairing, clothing/accessory suggestions, and customer objections about looks.',
-      outOfScope:
-        "I'm a fashion stylist, so I only help with outfits, clothing, colors, body shape, fabrics, accessories, or fashion retail. What occasion are you dressing for?",
     },
     vi: {
       internal: [
@@ -203,15 +188,13 @@ function getLocalizedChatReply(language: Language, key: 'internal' | 'genericSal
       ].join('\n\n'),
       genericSales:
         'Mình có thể hỗ trợ bán hàng, nhưng chỉ trong phạm vi thời trang: tư vấn size, chất liệu, phối set, gợi ý sản phẩm quần áo/phụ kiện và xử lý băn khoăn của khách về outfit.',
-      outOfScope:
-        'Mình là stylist thời trang, nên mình chỉ hỗ trợ các câu hỏi về phối đồ, trang phục, màu sắc, dáng người, chất liệu, phụ kiện hoặc bán hàng thời trang. Bạn muốn mình tư vấn outfit cho dịp nào?',
     },
   };
 
   return replies[language][key];
 }
 
-function getLocalChatReply(content: string, previousMessages: ChatMessage[], language: Language): string | null {
+function getLocalChatReply(content: string, language: Language): string | null {
   const text = normalizeChatText(content);
   const asksInternalModel =
     /\b(model|mo hinh)\b/.test(text) &&
@@ -236,12 +219,6 @@ function getLocalChatReply(content: string, previousMessages: ChatMessage[], lan
 
   if (isGeneralChat(text)) return null;
 
-  if (!isFashionRelated(text)) {
-    if (hasRecentFashionContext(previousMessages) && isContextualFashionFollowUp(text)) return null;
-
-    return getLocalizedChatReply(language, 'outOfScope');
-  }
-
   return null;
 }
 
@@ -252,9 +229,11 @@ function buildChatSystemInstruction(profile: UserProfile): string {
 
 PHẠM VI BẮT BUỘC:
 - Chỉ trả lời câu hỏi thuộc lĩnh vực thời trang: trang phục, phối đồ, màu sắc, dáng người, chất liệu, phụ kiện, xu hướng mặc, chăm sóc tủ đồ, hoặc bán hàng thời trang.
-- Một câu hỏi được xem là thuộc thời trang nếu người dùng đang hỏi nên mặc gì, chọn bộ đồ, phối đồ, dự tiệc, đi làm, đi chơi, đi cưới, chọn màu/form/chất liệu, dù câu đó có nhắc thêm người nổi tiếng, chính trị gia, nhân vật hư cấu, địa điểm hoặc bối cảnh kỳ quặc.
-- Nếu câu hỏi có cả thời trang và yếu tố ngoài thời trang, hãy trả lời phần thời trang. Không bình luận về chính trị, đời tư, lịch sử, pháp lý hay nhân vật được nhắc đến; chỉ dùng bối cảnh đó để suy ra mức độ trang trọng, dress code và vibe.
-- Chỉ từ chối khi câu hỏi KHÔNG có yêu cầu thời trang rõ ràng. Khi từ chối, nói 1 câu ngắn và mời người dùng hỏi lại về outfit/thời trang.
+- Một câu hỏi được xem là thuộc thời trang nếu người dùng đang hỏi nên mặc gì, chọn bộ đồ, phối đồ, dự tiệc, đi làm, đi chơi, đi cưới, chọn màu/form/chất liệu, hoặc hỏi một câu mơ hồ nhưng có bối cảnh ăn mặc như "đi gặp", "đi dự", "đi tiệc", "đi đám cưới", "đi phỏng vấn", "ra mắt", "hẹn hò", "gala", "black tie", "formal".
+- Nếu câu hỏi có cả thời trang và yếu tố ngoài thời trang, luôn trả lời phần thời trang. Không bình luận về chính trị, đời tư, lịch sử, pháp lý hay nhân vật được nhắc đến; chỉ dùng bối cảnh đó để suy ra mức độ trang trọng, dress code và vibe.
+- Không được từ chối chỉ vì câu hỏi nhắc đến người nổi tiếng, chính trị gia, nhân vật hư cấu, địa điểm hoặc bối cảnh kỳ quặc. Nếu intent là outfit, hãy tư vấn outfit.
+- Chỉ từ chối khi câu hỏi KHÔNG có yêu cầu hoặc ngữ cảnh thời trang rõ ràng. Khi từ chối, nói 1 câu ngắn và mời người dùng hỏi lại về outfit/thời trang.
+- Ví dụ: "tôi muốn 1 bộ đồ đi đám cưới tổng thống Putin" là câu hỏi thời trang. Hãy tư vấn trang phục dự đám cưới trang trọng, không bàn về Putin hay chính trị.
 
 Mục tiêu:
 - Tư vấn phối đồ theo dịp, vóc dáng, màu da, ngân sách, thời tiết, độ tuổi, môi trường làm việc và phong cách cá nhân.
@@ -268,7 +247,7 @@ Quy tắc trả lời:
 4. Nếu thiếu thông tin quan trọng, hỏi tối đa 1-2 câu ngắn. Nếu vẫn có thể giúp, đưa gợi ý theo giả định hợp lý.
 5. Khi tư vấn outfit, ưu tiên cấu trúc: tổng hướng phối, món chính, màu/chất liệu, phụ kiện, lưu ý form dáng.
 6. Khi tư vấn bán hàng, giữ giọng chuyên nghiệp, không thao túng khách, không hứa kết quả chắc chắn.
-7. Tránh lan man về AI, công nghệ, chính sách, hoặc kiến thức ngoài thời trang. Nếu câu hỏi có intent outfit, vẫn tư vấn outfit và bỏ qua phần ngoài ngành.
+7. Tránh lan man về AI, công nghệ, chính sách, hoặc kiến thức ngoài thời trang. Nếu câu hỏi có intent outfit hoặc bối cảnh ăn mặc, vẫn tư vấn outfit và bỏ qua phần ngoài ngành.
 8. Giọng văn: tinh tế, thẳng vào việc, thân thiện, không dùng quá nhiều icon.
 
 Định dạng:
@@ -550,7 +529,6 @@ export const useAppStore = create<AppStore>((set, get) => ({
   isChatLoading: false,
 
   sendMessage: async (content: string) => {
-    const previousMessages = get().messages;
     const userMsg: ChatMessage = {
       id: Date.now().toString(),
       role: 'user',
@@ -563,7 +541,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
       isChatLoading: true,
     }));
 
-    const localReply = getLocalChatReply(content, previousMessages, get().language);
+    const localReply = getLocalChatReply(content, get().language);
     if (localReply) {
       const botMsg: ChatMessage = {
         id: (Date.now() + 1).toString(),
