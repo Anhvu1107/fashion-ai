@@ -58,6 +58,7 @@ export interface ChatMessage {
   timestamp: Date;
 }
 
-export const CHATBOT_RESPONSES: Record<string, string> = {
-  default: "Chào bạn, mình là AURA. Mình có thể tư vấn phối đồ theo dịp, dáng người, màu da, ngân sách, hoặc hỗ trợ kịch bản bán hàng thời trang. Bạn đang cần chọn outfit cho tình huống nào?",
+export const CHATBOT_RESPONSES: Record<'en' | 'vi', string> = {
+  en: "Hi, I'm AURA. I can help with outfit ideas by occasion, body shape, skin tone, budget, or fashion sales scripts. What situation are you dressing for?",
+  vi: "Chào bạn, mình là AURA. Mình có thể tư vấn phối đồ theo dịp, dáng người, màu da, ngân sách, hoặc hỗ trợ kịch bản bán hàng thời trang. Bạn đang cần chọn outfit cho tình huống nào?",
 };

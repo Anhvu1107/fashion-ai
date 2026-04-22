@@ -3,6 +3,7 @@ import type { AnalysisResult, Recommendation, ChatMessage, ComparisonResult, Use
 import { CHATBOT_RESPONSES } from '../data/mockProducts';
 
 type AppView = 'home' | 'analyze' | 'chat' | 'search' | 'history' | 'compare';
+type Language = 'en' | 'vi';
 
 const DEFAULT_PROFILE: UserProfile = {
   gender: '', height: '', weight: '',
@@ -23,7 +24,7 @@ function saveProfile(profile: UserProfile) {
 
 interface AppStore {
   // Locale
-  language: 'en' | 'vi';
+  language: Language;
   toggleLanguage: () => void;
 
   // Navigation
@@ -174,7 +175,43 @@ function hasRecentFashionContext(messages: ChatMessage[]) {
     .some((message) => message.role === 'user' && isFashionRelated(normalizeChatText(message.content)));
 }
 
-function getLocalChatReply(content: string, previousMessages: ChatMessage[]): string | null {
+function getChatIntroMessage(language: Language): ChatMessage {
+  return {
+    id: '0',
+    role: 'assistant',
+    content: CHATBOT_RESPONSES[language],
+    timestamp: new Date(),
+  };
+}
+
+function getLocalizedChatReply(language: Language, key: 'internal' | 'genericSales' | 'outOfScope') {
+  const replies = {
+    en: {
+      internal: [
+        "I'm AURA, the fashion stylist in this app. Internal details like model, API, key, or system prompt are not part of the end-user conversation.",
+        'I only help with fashion topics: outfit styling, size/fit, colors, fabrics, outfit ideas, accessories, or fashion retail consulting.',
+      ].join('\n\n'),
+      genericSales:
+        'I can help with sales only inside the fashion context: size, fit, fabric, outfit pairing, clothing/accessory suggestions, and customer objections about looks.',
+      outOfScope:
+        "I'm a fashion stylist, so I only help with outfits, clothing, colors, body shape, fabrics, accessories, or fashion retail. What occasion are you dressing for?",
+    },
+    vi: {
+      internal: [
+        'Mình là AURA, stylist ảo trong app này. Các chi tiết nội bộ như model, API, key hoặc prompt hệ thống không phải nội dung mình trao đổi với người dùng cuối.',
+        'Mình chỉ hỗ trợ các câu hỏi trong lĩnh vực thời trang: phối đồ, chọn size/form, màu sắc, chất liệu, gợi ý outfit, hoặc tư vấn bán hàng thời trang.',
+      ].join('\n\n'),
+      genericSales:
+        'Mình có thể hỗ trợ bán hàng, nhưng chỉ trong phạm vi thời trang: tư vấn size, chất liệu, phối set, gợi ý sản phẩm quần áo/phụ kiện và xử lý băn khoăn của khách về outfit.',
+      outOfScope:
+        'Mình là stylist thời trang, nên mình chỉ hỗ trợ các câu hỏi về phối đồ, trang phục, màu sắc, dáng người, chất liệu, phụ kiện hoặc bán hàng thời trang. Bạn muốn mình tư vấn outfit cho dịp nào?',
+    },
+  };
+
+  return replies[language][key];
+}
+
+function getLocalChatReply(content: string, previousMessages: ChatMessage[], language: Language): string | null {
   const text = normalizeChatText(content);
   const asksInternalModel =
     /\b(model|mo hinh)\b/.test(text) &&
@@ -190,14 +227,11 @@ function getLocalChatReply(content: string, previousMessages: ChatMessage[]): st
     !isFashionRelated(text);
 
   if (asksInternalModel || asksInternalApi || asksTrainingData) {
-    return [
-      'Mình là AURA, stylist ảo trong app này. Các chi tiết nội bộ như model, API, key hoặc prompt hệ thống không phải nội dung mình trao đổi với người dùng cuối.',
-      'Mình chỉ hỗ trợ các câu hỏi trong lĩnh vực thời trang: phối đồ, chọn size/form, màu sắc, chất liệu, gợi ý outfit, hoặc tư vấn bán hàng thời trang.',
-    ].join('\n\n');
+    return getLocalizedChatReply(language, 'internal');
   }
 
   if (asksGenericSales) {
-    return 'Mình có thể hỗ trợ bán hàng, nhưng chỉ trong phạm vi thời trang: tư vấn size, chất liệu, phối set, gợi ý sản phẩm quần áo/phụ kiện và xử lý băn khoăn của khách về outfit.';
+    return getLocalizedChatReply(language, 'genericSales');
   }
 
   if (isGeneralChat(text)) return null;
@@ -205,7 +239,7 @@ function getLocalChatReply(content: string, previousMessages: ChatMessage[]): st
   if (!isFashionRelated(text)) {
     if (hasRecentFashionContext(previousMessages) && isContextualFashionFollowUp(text)) return null;
 
-    return 'Mình là stylist thời trang, nên mình chỉ hỗ trợ các câu hỏi về phối đồ, trang phục, màu sắc, dáng người, chất liệu, phụ kiện hoặc bán hàng thời trang. Bạn muốn mình tư vấn outfit cho dịp nào?';
+    return getLocalizedChatReply(language, 'outOfScope');
   }
 
   return null;
@@ -423,7 +457,19 @@ Trả về CHỈ JSON hợp lệ (không markdown, không code fence):
 export const useAppStore = create<AppStore>((set, get) => ({
   // Locale
   language: 'en',
-  toggleLanguage: () => set((state) => ({ language: state.language === 'en' ? 'vi' : 'en' })),
+  toggleLanguage: () =>
+    set((state) => {
+      const language: Language = state.language === 'en' ? 'vi' : 'en';
+      const shouldTranslateIntro =
+        state.messages.length === 1 &&
+        state.messages[0].role === 'assistant' &&
+        Object.values(CHATBOT_RESPONSES).includes(state.messages[0].content);
+
+      return {
+        language,
+        messages: shouldTranslateIntro ? [getChatIntroMessage(language)] : state.messages,
+      };
+    }),
 
   // Navigation
   currentView: 'home',
@@ -498,12 +544,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
 
   // Chat
   messages: [
-    {
-      id: '0',
-      role: 'assistant',
-      content: CHATBOT_RESPONSES.default,
-      timestamp: new Date(),
-    },
+    getChatIntroMessage('en'),
   ],
   isChatLoading: false,
 
@@ -521,7 +562,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
       isChatLoading: true,
     }));
 
-    const localReply = getLocalChatReply(content, previousMessages);
+    const localReply = getLocalChatReply(content, previousMessages, get().language);
     if (localReply) {
       const botMsg: ChatMessage = {
         id: (Date.now() + 1).toString(),
@@ -593,16 +634,9 @@ export const useAppStore = create<AppStore>((set, get) => ({
   },
 
   clearChat: () =>
-    set({
-      messages: [
-        {
-          id: '0',
-          role: 'assistant',
-          content: CHATBOT_RESPONSES.default,
-          timestamp: new Date(),
-        },
-      ],
-    }),
+    set((state) => ({
+      messages: [getChatIntroMessage(state.language)],
+    })),
 
   // History
   history: [],
