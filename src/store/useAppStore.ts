@@ -143,12 +143,12 @@ function normalizeChatText(value: string) {
 function isFashionRelated(text: string) {
   return [
     /\b(thoi trang|fashion|style|stylist|phong cach|aesthetic|quiet luxury|capsule)\b/,
-    /\b(trang phuc|outfit|look|set do|phoi do|mix do|mac gi|mac sao|mac dep)\b/,
+    /\b(trang phuc|outfit|look|set do|phoi do|mix do|goi y do|do mac|len do|chon do|mac gi|mac sao|mac dep|nen mac)\b/,
     /\b(ao|quan|vay|dam|chan vay|so mi|blazer|vest|suit|jean|denim|hoodie|cardigan|ao khoac)\b/,
     /\b(giay|sneaker|boot|sandal|tui|tui xach|that lung|dong ho|kinh|phu kien)\b/,
     /\b(size|form|fit|chat lieu|vai|cotton|linen|lua|len|da|mau|mau da|tone da|bang mau)\b/,
     /\b(voc dang|dang nguoi|cao|can nang|vong eo|vong 1|vong 2|vong 3)\b/,
-    /\b(cong so|di lam|phong van|hen ho|du tiec|gala|cuoi|du lich|di choi|di hoc)\b/,
+    /\b(cong so|di lam|phong van|hen ho|du tiec|gala|cuoi|du lich|di choi|di hoc|di gap|gap nyc|nguoi yeu cu|crush|ra mat|di cafe|di an|di xem phim)\b/,
     /\b(shop|khach|tu van khach|chot don|san pham|local brand|brand|bo suu tap|ton kho)\b/,
   ].some((pattern) => pattern.test(text));
 }
@@ -161,7 +161,20 @@ function isGeneralChat(text: string) {
   ].some((pattern) => pattern.test(text));
 }
 
-function getLocalChatReply(content: string): string | null {
+function isContextualFashionFollowUp(text: string) {
+  return [
+    /^(ua|sao|roi|the thi|vay thi)\b/,
+    /\b(dang hoi|hoi luon|y la|cau tren|cai tren|vua hoi|tiep|them|cu the hon|noi ro|lam lai)\b/,
+  ].some((pattern) => pattern.test(text));
+}
+
+function hasRecentFashionContext(messages: ChatMessage[]) {
+  return messages
+    .slice(-4)
+    .some((message) => message.role === 'user' && isFashionRelated(normalizeChatText(message.content)));
+}
+
+function getLocalChatReply(content: string, previousMessages: ChatMessage[]): string | null {
   const text = normalizeChatText(content);
   const asksInternalModel =
     /\b(model|mo hinh)\b/.test(text) &&
@@ -190,6 +203,8 @@ function getLocalChatReply(content: string): string | null {
   if (isGeneralChat(text)) return null;
 
   if (!isFashionRelated(text)) {
+    if (hasRecentFashionContext(previousMessages) && isContextualFashionFollowUp(text)) return null;
+
     return 'Mình là stylist thời trang, nên mình chỉ hỗ trợ các câu hỏi về phối đồ, trang phục, màu sắc, dáng người, chất liệu, phụ kiện hoặc bán hàng thời trang. Bạn muốn mình tư vấn outfit cho dịp nào?';
   }
 
@@ -493,6 +508,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
   isChatLoading: false,
 
   sendMessage: async (content: string) => {
+    const previousMessages = get().messages;
     const userMsg: ChatMessage = {
       id: Date.now().toString(),
       role: 'user',
@@ -505,7 +521,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
       isChatLoading: true,
     }));
 
-    const localReply = getLocalChatReply(content);
+    const localReply = getLocalChatReply(content, previousMessages);
     if (localReply) {
       const botMsg: ChatMessage = {
         id: (Date.now() + 1).toString(),
