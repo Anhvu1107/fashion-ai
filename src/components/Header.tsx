@@ -24,22 +24,22 @@ export default function Header() {
 
   return (
     <header className="h-16 border-b border-[#C9A84C]/10 bg-[#0a0a0a]/80 backdrop-blur-xl flex items-center justify-between px-6 flex-shrink-0 sticky top-0 z-20">
-      <div className="flex items-center gap-4">
+      <div className="flex min-w-0 items-center gap-4">
         <button
           onClick={toggleSidebar}
-          className="lg:hidden text-[#666] hover:text-white transition-colors p-1"
+          className="lg:hidden flex-shrink-0 text-[#666] hover:text-white transition-colors p-1"
         >
           <Menu className="w-5 h-5" />
         </button>
-        <div>
-          <h2 className="text-sm font-medium text-white font-['Space_Grotesk'] tracking-wide">
+        <div className="min-w-0">
+          <h2 className="truncate text-sm font-medium text-white font-['Space_Grotesk'] tracking-wide">
             {title}
           </h2>
-          <p className="text-[11px] text-[#555] font-['Space_Grotesk']">{subtitle}</p>
+          <p className="truncate text-[11px] text-[#555] font-['Space_Grotesk']">{subtitle}</p>
         </div>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex flex-shrink-0 items-center gap-2">
         {/* Status badge */}
         <div className="hidden sm:flex items-center gap-2 bg-[#111] border border-[#C9A84C]/20 rounded-full px-3 py-1.5">
           <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
@@ -64,7 +64,8 @@ export default function Header() {
         {/* Profile / Settings */}
         <button
           onClick={toggleProfile}
-          className="relative hidden sm:flex w-8 h-8 items-center justify-center text-[#555] hover:text-[#C9A84C] transition-colors rounded-lg hover:bg-[#C9A84C]/10"
+          aria-label="Open profile settings"
+          className="relative flex w-8 h-8 items-center justify-center text-[#555] hover:text-[#C9A84C] transition-colors rounded-lg hover:bg-[#C9A84C]/10"
         >
           <User className="w-4 h-4" />
           {hasProfile && (
